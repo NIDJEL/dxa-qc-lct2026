@@ -1,0 +1,17 @@
+# Never publish patient data, model assets or runtime files
+Dataset_learn/
+Dataset_test/
+models/
+artifacts/
+tmp/
+.tmp/
+.env
+*.key
+*.pem
+*.pt
+*.pth
+*.safetensors
+*.dcm
+*.zip
+__pycache__/
+*.pyc

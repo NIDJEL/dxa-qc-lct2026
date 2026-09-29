@@ -1,0 +1,14 @@
+**
+!Dockerfile
+!requirements-inference.txt
+!src/
+!src/dxa_qc/
+!src/dxa_qc/*.py
+!src/dxa_qc/web_static/
+!src/dxa_qc/web_static/*.html
+!src/dxa_qc/web_static/*.css
+!src/dxa_qc/web_static/*.js
+!scripts/
+!scripts/run_dxa_qc_service.py
+!scripts/run_dxa_qc_web.py
+!scripts/benchmark_submission.py

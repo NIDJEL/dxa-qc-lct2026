@@ -1,0 +1,24 @@
+services:
+  dxa-qc:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: dxa-qc:stopcode-20260929
+    restart: unless-stopped
+    init: true
+    environment:
+      DXA_QC_DEVICE: ${DXA_QC_DEVICE:-auto}
+      HF_HUB_OFFLINE: "1"
+      TRANSFORMERS_OFFLINE: "1"
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      - ${DXA_ASSETS_DIR:?Set DXA_ASSETS_DIR}/models:/app/models:ro
+      - ${DXA_ASSETS_DIR:?Set DXA_ASSETS_DIR}/artifacts/E007_FULL_V1/A3:/app/artifacts/E007_FULL_V1/A3:ro
+      - ${DXA_ASSETS_DIR:?Set DXA_ASSETS_DIR}/artifacts/E023_ANATOMY_ROUTER_PILOT_V1_FINAL/router_production.json:/app/artifacts/E023_ANATOMY_ROUTER_PILOT_V1_FINAL/router_production.json:ro
+    read_only: true
+    tmpfs:
+      - /tmp:rw,nosuid,nodev,size=1g,uid=10001,gid=10001
+    pids_limit: 256
+    security_opt:
+      - no-new-privileges:true

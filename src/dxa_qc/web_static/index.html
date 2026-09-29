@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>DXA QC — демонстрационный анализ</title>
+  <link rel="stylesheet" href="/static/styles.css">
+  <script src="/static/app.js" defer></script>
+</head>
+<body>
+  <div class="shell">
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="DXA QC, на главную">
+        <span class="brand-mark">D<span>✳</span></span>
+        <span>DXA QC<span class="brand-sub">LOCAL ANALYSIS</span></span>
+      </a>
+      <div class="header-right">
+        <span class="offline"><span class="offline-dot"></span>Локальный inference</span>
+        <span class="header-divider"></span>
+        <span class="version">E007 A3&nbsp; / &nbsp;E023</span>
+      </div>
+    </header>
+
+    <main>
+      <p class="public-notice">Публичный демонстрационный стенд. Не загружайте идентифицируемые медицинские данные пациентов.</p>
+      <section id="upload-view" class="view">
+        <div class="eyebrow"><span class="eyebrow-line"></span> КОНТРОЛЬ КАЧЕСТВА DXA</div>
+        <div class="hero">
+          <div>
+            <h1>Анализ снимков.<br><em>Без лишних шагов.</em></h1>
+            <p class="hero-copy">Загрузите DICOM-файл или папку с исследованиями. Анатомическая область определяется автоматически; результаты доступны для каждого снимка.</p>
+          </div>
+          <div class="hero-index" aria-hidden="true"><span>01</span> / 03<br><small>ЗАГРУЗКА · АНАЛИЗ · РЕЗУЛЬТАТ</small></div>
+        </div>
+        <div id="dropzone" class="dropzone" tabindex="0" role="button" aria-label="Выбрать DICOM-файлы или перетащить сюда">
+          <div class="drop-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none"><path d="M24 32V10m0 0-8 8m8-8 8 8M8 30v6a4 4 0 0 0 4 4h24a4 4 0 0 0 4-4v-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <h2>Перетащите DICOM сюда</h2>
+          <p>или выберите файлы на компьютере</p>
+          <div class="pick-actions">
+            <button type="button" id="pick-files" class="button secondary">Выбрать файлы</button>
+            <button type="button" id="pick-folder" class="button secondary">Выбрать папку</button>
+          </div>
+          <span class="drop-foot">DICOM · до 512 файлов · до 512 МБ в одном задании</span>
+        </div>
+        <input id="files-input" class="sr-only" type="file" multiple accept=".dcm,application/dicom">
+        <input id="folder-input" class="sr-only" type="file" multiple webkitdirectory directory>
+        <div id="selected-panel" class="selected-panel hidden">
+          <div class="section-heading"><div><span class="kicker">ПОДГОТОВКА</span><h2>Выбранные файлы <span id="selected-count" class="muted"></span></h2></div><button id="clear-files" class="text-button" type="button">Очистить список</button></div>
+          <div id="selected-list" class="selected-list"></div>
+          <label class="experimental-toggle"><input id="singleton-mode" type="checkbox"><span><strong>Экспериментально: каждый снимок отдельно</strong><small>Singleton-bag — предварительный результат. Официальный CSV недоступен.</small></span></label>
+          <div class="action-line"><button id="start-analysis" class="button primary" type="button">Начать анализ <span aria-hidden="true">↗</span></button><span>Анализ выполняется на сервере DXA QC. Данные не отправляются в сторонние inference API.</span></div>
+        </div>
+        <div class="info-grid">
+          <div><span class="info-number">01 /</span><strong>Автоматическая маршрутизация</strong><p>Позвоночник или бедро — по содержимому изображения, без ручного выбора модели.</p></div>
+          <div><span class="info-number">02 /</span><strong>Отдельная оценка качества</strong><p>Независимая quality-head и применимые проверки нарушений для каждой области.</p></div>
+          <div><span class="info-number">03 /</span><strong>Обработка на сервере</strong><p>Снимки и результаты хранятся временно на сервере DXA QC.</p></div>
+        </div>
+      </section>
+
+      <section id="progress-view" class="view hidden" aria-live="polite">
+        <div class="eyebrow"><span class="eyebrow-line"></span> ВЫПОЛНЕНИЕ</div>
+        <div class="progress-layout">
+          <div><h1>Анализ<br><em>в процессе.</em></h1><p>Работают локальные DINOv3 Large, MedImageInsight, E007 A3 и E023. Не закрывайте страницу до появления результатов.</p></div>
+          <div class="progress-card"><div class="progress-top"><span>ОБРАБОТКА</span><strong id="progress-percent">0%</strong></div><div class="progress-track"><span id="progress-bar"></span></div><p id="progress-stage">Подготовка задания</p><small id="progress-files"></small></div>
+        </div>
+      </section>
+
+      <section id="results-view" class="view hidden">
+        <div class="eyebrow"><span class="eyebrow-line"></span> РЕЗУЛЬТАТЫ АНАЛИЗА</div>
+        <div class="results-heading">
+          <div><h1>Обзор <em>исследований.</em></h1><p>Модельные оценки для просмотра и проверки, не врачебное заключение.</p></div>
+          <div class="export-actions"><a id="export-csv" class="button secondary" download>Скачать CSV ↓</a><a id="export-json" class="button primary" download>Скачать подробный JSON ↓</a></div>
+        </div>
+        <div id="result-warning" class="warning hidden"></div>
+        <div id="metrics" class="metric-grid"></div>
+        <div class="gallery-top"><div><span class="kicker">ГАЛЕРЕЯ</span><h2>Снимки и результаты</h2></div><button id="new-analysis" class="text-button" type="button">Новый анализ ↗</button></div>
+        <div class="filters" role="group" aria-label="Фильтры снимков">
+          <button class="filter active" data-filter="all" type="button">Все</button>
+          <button class="filter" data-filter="spine" type="button">Позвоночник</button>
+          <button class="filter" data-filter="hip" type="button">Бедро</button>
+          <button class="filter" data-filter="good" type="button">Качество: норма</button>
+          <button class="filter" data-filter="attention" type="button">Требует внимания</button>
+          <button class="filter" data-filter="violations" type="button">Нарушения</button>
+          <button class="filter" data-filter="errors" type="button">Ошибки</button>
+        </div>
+        <div id="study-list" class="study-list"></div>
+        <div id="gallery" class="gallery"></div>
+        <p id="gallery-empty" class="empty hidden">В этой категории снимков нет.</p>
+      </section>
+
+      <section id="detail-view" class="view hidden">
+        <button id="back-results" class="back-button" type="button">← Все результаты</button>
+        <div class="detail-title"><div><span class="kicker">ПОДРОБНЫЙ АНАЛИЗ</span><h1 id="detail-name">Снимок</h1></div><span id="detail-counter" class="muted"></span></div>
+        <div class="detail-layout">
+          <div class="viewer-wrap">
+            <div class="viewer-head"><span>ИСХОДНЫЙ DICOM · ВИЗУАЛИЗАЦИЯ</span><div class="viewer-tools"><button id="zoom-out" aria-label="Уменьшить" type="button">−</button><button id="zoom-reset" aria-label="Сбросить масштаб" type="button">Сбросить</button><button id="zoom-in" aria-label="Увеличить" type="button">+</button></div></div>
+            <div id="viewer" class="viewer"><img id="detail-image" alt="Исходный DICOM-снимок"><span id="viewer-error" class="viewer-error hidden">Просмотр недоступен для этого файла.</span></div>
+            <p class="viewer-note">Перетаскивайте изображение для перемещения. Колёсико мыши изменяет масштаб. Полный исходный кадр отображается без обрезки.</p>
+          </div>
+          <aside id="detail-panel" class="detail-panel"></aside>
+        </div>
+      </section>
+    </main>
+    <footer><span>DXA QC / ЛОКАЛЬНЫЙ ИССЛЕДОВАТЕЛЬСКИЙ СЕРВИС</span><span>Не является подтверждённым клиническим заключением <span class="footer-star">✳</span></span></footer>
+  </div>
+  <div id="toast" class="toast hidden" role="alert"></div>
+</body>
+</html>

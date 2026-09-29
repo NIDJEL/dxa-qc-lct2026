@@ -1,0 +1,3 @@
+services:
+  dxa-qc:
+    gpus: all
