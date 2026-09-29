@@ -2,7 +2,7 @@
 
 Публичный сервер: Ubuntu, Docker Engine с Compose plugin, Nginx. Код размещается в `/opt/dxa-qc`. Проверенные локальные веса передаются отдельно в каталог `/opt/dxa-qc-assets` в соответствии с их лицензиями; он не находится в Git и монтируется только для чтения. До сборки установите `DXA_ASSETS_DIR=/opt/dxa-qc-assets` и проверьте SHA256 по локальному инвентарю.
 
-Запуск: `bash deploy/check_release.sh`. Compose публикует порт приложения только на `127.0.0.1:8000`. Для GPU установите NVIDIA Container Toolkit и запустите `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.gpu.yml up -d --build` с `DXA_QC_DEVICE=cuda`. Без GPU используйте `DXA_QC_DEVICE=cpu docker compose -f deploy/docker-compose.yml up -d --build`. Производительность CPU нужно измерить на целевом сервере.
+Запуск: `bash deploy/check_release.sh`. Если образ уже собран и проверен вручную, `DXA_SKIP_BUILD=1 bash deploy/check_release.sh` использует его без повторной сборки. Compose публикует порт приложения только на `127.0.0.1:8000`. Для GPU установите NVIDIA Container Toolkit и запустите `docker compose -f deploy/docker-compose.yml -f deploy/docker-compose.gpu.yml up -d --build` с `DXA_QC_DEVICE=cuda`. Без GPU используйте `DXA_QC_DEVICE=cpu docker compose -f deploy/docker-compose.yml up -d --build`. Производительность CPU нужно измерить на целевом сервере.
 
 Nginx проксирует `:80` на `127.0.0.1:8000`. Минимальный site config:
 
