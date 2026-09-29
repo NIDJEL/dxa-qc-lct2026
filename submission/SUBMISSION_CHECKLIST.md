@@ -9,8 +9,9 @@
 | Публичный репозиторий | Да | https://github.com/NIDJEL/dxa-qc-lct2026 |
 | Архив собственных runtime heads | Да, предварительный Release | SHA256 `e8035ff2262c902c1e702580452c490f603f9673df072714153a58744580fd37` |
 | Презентация | Да | 12 слайдов, PPTX и PDF; шаблон организатора сохранён |
-| Docker build и offline smoke финального образа | Нет | локальный Docker daemon недоступен |
-| Сервер, Nginx, внешний health/API/UI smoke | Нет | верный сервер `31.77.11.129` доступен по SSH, но имеет 1 vCPU, 1,9 ГБ RAM, без GPU/swap; Docker отсутствует и работают другие сервисы |
+| Docker build и offline smoke финального образа | Да | серверный build завершён; image `sha256:391f0e14b56e97c26480a4c3da7698d89ce184fbbefeaafc4bb80d828b9cf616`; offline CPU smoke: 3 файла, 2 bags, 0 ошибок, 291 с |
+| Серверный health/API | Да, loopback | `31.77.11.129`, Compose healthy, `/api/health` отвечает; 1 vCPU, 1,9 ГБ RAM, 8 ГБ swap, без GPU |
+| Nginx, внешний health/API/UI smoke | Нет | внешний домен/маршрут для этого сервиса не согласован; действующие сайты не изменялись |
 | Финальный stop-code tag | Нет | ставить только после успешных Docker и серверных проверок |
 
-Следующее действие: получить сервер с достаточной RAM/GPU либо увеличить ресурсы текущего. Затем установить Docker, собрать образ, выполнить `bash deploy/check_release.sh`, проверить offline inference, UI, CSV/JSON, ресурсы и внешний URL. После успешных проверок обновить этот файл и поставить аннотированный stop-code tag.
+Следующее действие: согласовать отдельный домен или порт для Nginx, выполнить внешний health/API/UI smoke и только затем поставить аннотированный stop-code tag. CPU inference пригоден для smoke, но не для быстрой публичной работы.
